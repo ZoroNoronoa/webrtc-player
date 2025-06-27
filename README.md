@@ -1,98 +1,91 @@
 # BitWHIP
 
-[![License][license-image]][license-url]
-[![Discord][discord-image]][discord-invite-url]
+- [BitWHIP](#bitwhip)
+  - [什么是 BitWHIP](#什么是-bitwhip)
+  - [构建](#构建)
+    - [安装 Just](#安装-just)
+    - [安装依赖](#安装依赖)
+  - [使用方法](#使用方法)
+    - [播放 WHIP](#播放-whip)
+    - [播放 WHEP](#播放-whep)
+    - [推流](#推流)
+  - [TODO](#todo)
+  - [更多信息](#更多信息)
 
-- [What is BitWHIP](#what-is-bitwhip)
-- [Building](#building)
-- [Using](#using)
-- [TODO](#todo)
-- [More](#more)
+## 什么是 BitWHIP
 
-## What is BitWHIP
+BitWHIP 是一个用 Rust 编写的命令行 WebRTC Agent。你可以用它做以下事情：
 
-BitWHIP is a CLI WebRTC Agent written in Rust. These are some of the things you can do with it today.
+- 以 30ms 延迟发布你的桌面
+- 在本地播放器中播放流
+- 从其他来源拉取 WebRTC 视频并播放
+  - [Broadcast Box](https://github.com/glimesh/broadcast-box)
+  - [IVS](https://aws.amazon.com/ivs/)
+  - [Cloudflare](https://developers.cloudflare.com/stream/webrtc-beta/)
+  - [Dolby.io](https://docs.dolby.io/streaming-apis/reference/whip_whippublish)
+  - [Red5](https://www.red5.net/docs/special/user-guide/whip-whep-configuration/)
+  - [Nimble Streamer](https://softvelum.com/nimble/)
+  - 任何支持 [WHIP](https://datatracker.ietf.org/doc/draft-ietf-wish-whip/)/[WHEP](https://datatracker.ietf.org/doc/draft-murillo-whep/) 的服务！
 
-* Publish your desktop with 30ms of latency
-* Play the stream in a native player
-* Pull WebRTC video from other sources and play
-  * [Broadcast Box][broadcast-box-url]
-  * [IVS](https://aws.amazon.com/ivs/)
-  * [Cloudflare](https://developers.cloudflare.com/stream/webrtc-beta/)
-  * [Dolby.io](https://docs.dolby.io/streaming-apis/reference/whip_whippublish)
-  * [Red5](https://www.red5.net/docs/special/user-guide/whip-whep-configuration/)
-  * [Nimble Streamer](https://softvelum.com/nimble/)
-  * any services that support [WHIP](https://datatracker.ietf.org/doc/draft-ietf-wish-whip/)/[WHEP](https://datatracker.ietf.org/doc/draft-murillo-whep/)!
+BitWHIP 基于开放协议构建，因此几乎可以在任何地方使用。它还可以与 OBS、FFmpeg 或 GStreamer 等你喜欢的工具和库互操作。
 
-BitWHIP is built on open protocols so should work pretty much anywhere. It should also interop with your
-favorite tools and libraries like OBS, FFmpeg or GStreamer.
+## 构建
 
-## Building
-BitWHIP uses [just](https://github.com/casey/just) to make installing dependencies and building easier. To build
-this project first you install `just` and then execute `install-deps`.
+BitWHIP 使用 [just](https://github.com/casey/just) 简化依赖安装和构建流程。要构建本项目，首先安装 `just`，然后执行 `install-deps`。
 
-### Install Just
+### 安装 Just
+
 `cargo install just`
 
-### Install dependencies
+### 安装依赖
+
 `just install-deps`
 
-## Using
-Now that you have built you have three different paths.
+## 使用方法
 
-### Play WHIP
+构建完成后，你有三种不同的使用方式。
 
-Play WHIP starts a local WHIP server that clients can push too. You can use this to push video from BitWHIP
-or other WHIP clients like [OBS](https://obsproject.com/) or [GStreamer](https://gstreamer.freedesktop.org/).
+### 播放 WHIP
 
-```
+播放 WHIP 会启动一个本地 WHIP 服务器，客户端可以推流到这里。你可以用 BitWHIP 或其他 WHIP 客户端（如 [OBS](https://obsproject.com/) 或 [GStreamer](https://gstreamer.freedesktop.org/)）推送视频。
+
+```bash
 just run play whip
 ```
 
-The WHIP client would use a URL of `http://localhost:1337/` and any Bearer Token you like. You can stream to
-it via BitWHIP by running `just run stream http://localhost:1337/ bitwhip`.
+WHIP 客户端应使用 `http://localhost:1337/` 作为 URL，并可使用任意 Bearer Token。你可以通过运行 `just run stream http://localhost:1337/ bitwhip` 用 BitWHIP 推流。
 
+### 播放 WHEP
 
-### Play WHEP
+播放 WHEP 会连接到 WHEP 服务器并播放视频。下面是一个从 <https://b.siobud.com/> 拉流并使用 Bearer Token `bitwhip` 的示例：
 
-Play WHEP connects to a WHEP server and plays video. Below is an example of pulling from https://b.siobud.com/ with
-a Bearer Token of `bitwhip`
-
-```
+```bash
 just run play-whep https://b.siobud.com/api/whep bitwhip
 ```
 
-After running this open https://b.siobud.com/publish/bitwhip and your video should open in a native player.
+运行后，打开 <https://b.siobud.com/publish/bitwhip>，你的视频会在本地播放器中打开。
 
-### Stream
+### 推流
 
-**Currently only Windows with NVIDIA cards are supported, more to be added**
+*目前仅支持带有 NVIDIA 显卡的 Windows，后续会支持更多平台。*
 
-Stream captures your local desktop and publish via WHIP. To run this you need a URL and a Bearer Token.
-Below is an example of pushing to https://b.siobud.com/ with a Bearer Token of `bitwhip`
+推流会捕获你的本地桌面并通过 WHIP 发布。运行时需要一个 URL 和 Bearer Token。下面是一个推送到 <https://b.siobud.com/> 并使用 Bearer Token `bitwhip` 的示例：
 
-```
+```bash
 just run stream https://b.siobud.com/api/whip bitwhip
 ```
+
 ## TODO
 
-* [ ] Create binaries
-* [ ] Improve Build System
-* Support more Capture
-  * [ ] gdigrab (Windows)
-  * [ ] x11grab (Linux)
-* Support more Encoding
-  * [ ] QuickSync
-  * [ ] x264
+- [ ] 创建二进制文件
+- [ ] 改进构建系统
+- 支持更多采集方式
+  - [ ] gdigrab（Windows）
+  - [ ] x11grab（Linux）
+- 支持更多编码方式
+  - [ ] QuickSync
+  - [ ] x264
 
-## More
+## 更多信息
 
-[Selkies-GStreamer](https://github.com/selkies-project/selkies-gstreamer) is a WebRTC remote desktop streaming implementation that has achieved 0-16ms of latency.
-
-[Join the Discord][discord-invite-url] and we are ready to help!
-
-[license-image]: https://img.shields.io/badge/License-MIT-yellow.svg
-[license-url]: https://opensource.org/licenses/MIT
-[discord-image]: https://img.shields.io/discord/1162823780708651018?logo=discord
-[discord-invite-url]: https://discord.gg/An5jjhNUE3
-[broadcast-box-url]: https://github.com/glimesh/broadcast-box
+[Selkies-GStreamer](https://github.com/selkies-project/selkies-gstreamer) 是一个 WebRTC 远程桌面流媒体实现，已实现 0-16ms 的延迟。
