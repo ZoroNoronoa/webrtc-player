@@ -7,7 +7,7 @@ ProjectDir := if path_exists(justfile_directory() / "Cargo.toml") == "true" { ju
        } else { justfile_directory() }
 ExtDir := ProjectDir / "ext"
 
-FFmpeg := if os() == "windows" { "ffmpeg-n7.0-latest-win64-gpl-shared-7.0"
+FFmpeg := if os() == "windows" { "ffmpeg-n7.1.1-54-g6400860b9d-win64-gpl-shared-7.1"
    } else if os() + arch() == "macosaarch64" { "ffmpeg-arm64"
    } else if os() + arch() == "macosx86_64"  { "ffmpeg-x64_64"
    } else if os() + arch() == "linuxaarch64" { "ffmpeg-n7.0-latest-linuxarm64-gpl-shared-7.0"

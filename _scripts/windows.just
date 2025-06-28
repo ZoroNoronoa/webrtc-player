@@ -20,7 +20,7 @@ install-deps:
 
     if (-not (Test-Path -Path "{{FFmpeg}}")) {
         echo "Downloading {{FFmpeg}}"
-        wget "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/{{FFmpeg}}.zip" -outfile "{{FFmpeg}}.zip"
+        wget "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-27-14-04/{{FFmpeg}}.zip" -outfile "{{FFmpeg}}.zip"
         Expand-Archive {{FFmpeg}}.zip temp-nested-folder
         Move-Item temp-nested-folder/{{FFmpeg}} {{FFmpeg}}
         del {{FFmpeg}}.zip
