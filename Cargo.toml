@@ -8,7 +8,6 @@ anyhow = "1.0.76"
 bytes = "1.5.0"
 clap = { version = "4.5.4", features = ["derive", "color"] }
 simplelog = { version = "0.12.2" }
-ffmpeg-next = "7.0.0"
 futures = "0.3.29"
 log = "0.4.21"
 str0m = "0.5.1"
@@ -25,4 +24,6 @@ tracing-subscriber = { version = "0.3", default-features = false, features = [
 url = "2.5.0"
 axum = "0.7.5"
 sdl2 = { version = "0.37.0", features = ["bundled"] }
-ffmpeg-sys-next = "7.0.0"
+# ffmpeg-sys-next 和 ffmpeg-next 的版本需要一致
+ffmpeg-sys-next = "7.1.0"
+ffmpeg-next = "7.1.0"

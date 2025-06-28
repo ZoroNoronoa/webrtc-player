@@ -8,6 +8,8 @@
   - [使用方法](#使用方法)
     - [播放 WHIP](#播放-whip)
     - [播放 WHEP](#播放-whep)
+      - [vdo.ninja（推荐，更加清晰）](#vdoninja推荐更加清晰)
+      - [b.siobud.com](#bsiobudcom)
     - [推流](#推流)
   - [TODO](#todo)
   - [更多信息](#更多信息)
@@ -39,7 +41,21 @@ BitWHIP 使用 [just](https://github.com/casey/just) 简化依赖安装和构建
 
 ### 安装依赖
 
-`just install-deps`
+choco 包管理器安装相关依赖：
+
+```bash
+# 安装 choco
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+# 安装 wget cmake
+choco install wget
+choco install cmake --version=3.30.0
+choco install llvm --version=16.0.6
+```
+
+just 安装 ffmpeg 和 openssl：
+
+`just install-deps`。
 
 ## 使用方法
 
@@ -56,6 +72,21 @@ just run play whip
 WHIP 客户端应使用 `http://localhost:1337/` 作为 URL，并可使用任意 Bearer Token。你可以通过运行 `just run stream http://localhost:1337/ bitwhip` 用 BitWHIP 推流。
 
 ### 播放 WHEP
+
+#### vdo.ninja（推荐，更加清晰）
+
+在 `https://vdo.ninja/whip` 页面选择 Host Steam 推流：
+
+![vdo.ninja-host-stream](./image/vdo.ninja-host-stream.png)
+
+```bash
+# play WHEP
+just run play-whep https://whep.vdo.ninja/kkkkeeee
+```
+
+可以看到直接弹出来一个播放器播放本地视频。
+
+#### b.siobud.com
 
 播放 WHEP 会连接到 WHEP 服务器并播放视频。下面是一个从 <https://b.siobud.com/> 拉流并使用 Bearer Token `bitwhip` 的示例：
 
