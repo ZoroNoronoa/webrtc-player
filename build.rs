@@ -19,20 +19,23 @@ fn main() {
             );
         }
         "windows" => {
+            const FFMPEG_DIR: &str = "ext\\ffmpeg-n7.1.1-54-g6400860b9d-win64-gpl-shared-7.1";
+
+            // 在 .cargo/config.toml 里无法根据不同的 target-os 设置不同的环境变量, 所以放在这
+            println!("cargo:rustc-env=FFMPEG_DIR={}", FFMPEG_DIR);
+
+            // 在 windows PATH 里追加 ffmpeg bin 路径, 避免查找不到 ffmpeg 的动态库
+            // 在 .cargo/config.toml 里无法给 windows 设置 PATH 环境变量, 暂时没找到原因
+            let current_path = std::env::var("PATH").unwrap();
+            let ffmpeg_bin_path = format!("{}\\bin", FFMPEG_DIR);
+            let combined_path = format!("{};{}", ffmpeg_bin_path, current_path);
+            println!("cargo:rustc-env=PATH={}", combined_path);
+
+            // 导出 NvOptimusEnablement 符号, 告诉 NVIDIA Optimus 系统优先使用独立显卡而非集成显卡
             println!("cargo:rustc-link-arg=/EXPORT:NvOptimusEnablement");
             println!("cargo:rustc-link-arg=/EXPORT:AmdPowerXpressRequestHighPerformance");
-            println!(
-                "cargo:rustc-link-search={}\\lib\\x64",
-                std::env::var("FFMPEG_DIR").expect("FFMPEG_DIR")
-            );
-            println!(
-                "cargo:rustc-link-search={}\\lib",
-                std::env::var("FFMPEG_DIR").expect("FFMPEG_DIR")
-            );
-            // println!(
-            //     "cargo:rustc-link-search={}",
-            //     std::env::var("OPENSSL_LIBS").expect("OPENSSL_LIBS")
-            // );
+            println!("cargo:rustc-link-search={}\\lib\\x64", FFMPEG_DIR);
+            println!("cargo:rustc-link-search={}\\lib", FFMPEG_DIR);
         }
         tos => panic!("unknown target os {:?}!", tos),
     }

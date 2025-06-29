@@ -7,7 +7,9 @@
         "iface",
         "linuxaarch",
         "linuxx",
+        "msvc",
         "netifas",
+        "rustc",
         "Selkies",
         "serde",
         "SHOUTY",
@@ -19,6 +21,7 @@
         "Vcpkg",
         "Webrtc",
         "WHEP",
+        "Xpress",
         "zcvf"
     ]
 }
