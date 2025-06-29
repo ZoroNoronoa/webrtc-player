@@ -108,6 +108,7 @@ just run stream https://b.siobud.com/api/whip bitwhip
 
 ## TODO
 
+- [ ] windows 下无法编译 debug 版本
 - [ ] 创建二进制文件
 - [ ] 改进构建系统
 - 支持更多采集方式

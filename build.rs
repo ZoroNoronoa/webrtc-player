@@ -19,10 +19,7 @@ fn main() {
             );
         }
         "windows" => {
-            const FFMPEG_DIR: &str = "ext\\ffmpeg-n7.1.1-54-g6400860b9d-win64-gpl-shared-7.1";
-
-            // 在 .cargo/config.toml 里无法根据不同的 target-os 设置不同的环境变量, 所以放在这
-            println!("cargo:rustc-env=FFMPEG_DIR={}", FFMPEG_DIR);
+            const FFMPEG_DIR: &str = "ext\\ffmpeg-gpl-shared-7.1";
 
             {
                 // 在 windows PATH 里追加 ffmpeg bin 路径, 避免查找不到 ffmpeg 的动态库

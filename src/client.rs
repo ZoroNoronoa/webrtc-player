@@ -19,6 +19,7 @@ use str0m::{
 use tokio::net::UdpSocket;
 use tracing::{debug, error, info, trace, warn};
 
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 pub struct WhipClaims {
     pub whip_url: String,
@@ -33,6 +34,7 @@ pub enum WebrtcEvent {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum WebrtcError {
     ServerError(Box<dyn Error + Send + Sync>),
     SdpError,
@@ -130,9 +132,9 @@ impl Client {
         let mut headers = reqwest::header::HeaderMap::new();
 
         if let Some(token) = &token {
-            let authoriation_value = HeaderValue::from_str(&format!("Bearer {}", token))
+            let authorization_value = HeaderValue::from_str(&format!("Bearer {}", token))
                 .map_err(|e| WebrtcError::ServerError(e.into()))?;
-            headers.append(AUTHORIZATION, authoriation_value);
+            headers.append(AUTHORIZATION, authorization_value);
         }
 
         headers.append(

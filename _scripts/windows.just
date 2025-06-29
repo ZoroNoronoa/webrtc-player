@@ -7,6 +7,8 @@ export VCPKG_ROOT := ProjectDir / "ext/vcpkg"
 # Use our vcpkg openssl
 export OPENSSL_NO_VENDOR := "1"
 
+FFmpegZipFileName := "ffmpeg-n7.1.1-54-g6400860b9d-win64-gpl-shared-7.1"
+
 [no-cd]
 install-deps:
     #!powershell
@@ -17,13 +19,12 @@ install-deps:
     cd {{ExtDir}}
 
     # FFMPEG
-
     if (-not (Test-Path -Path "{{FFmpeg}}")) {
         echo "Downloading {{FFmpeg}}"
-        wget "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-27-14-04/{{FFmpeg}}.zip" -outfile "{{FFmpeg}}.zip"
-        Expand-Archive {{FFmpeg}}.zip temp-nested-folder
-        Move-Item temp-nested-folder/{{FFmpeg}} {{FFmpeg}}
-        del {{FFmpeg}}.zip
+        wget "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-27-14-04/{{FFmpegZipFileName}}.zip" -outfile "{{FFmpegZipFileName}}.zip"
+        Expand-Archive {{FFmpegZipFileName}}.zip temp-nested-folder
+        Move-Item temp-nested-folder/{{FFmpegZipFileName}} {{FFmpeg}}
+        del {{FFmpegZipFileName}}.zip
         del temp-nested-folder
     }
 

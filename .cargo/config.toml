@@ -1,13 +1,12 @@
 [alias]
-b = "build"
+# windows 下编译 debug 版本会报错, 我们只编译 release 版本
+b = "build --release"
 c = "check"
 t = "test"
-r = "run"
-br = "build --release"
-rr = "run --release"
+r = "run --release"
 
 [env]
 VCPKG_ROOT = { value = "ext/vcpkg", relative = true, force = true }
 OPENSSL_NO_VENDOR = "1"
-# 这里无法根据不同的操作系统来设置不同的环境变量, 所以将 FFMPEG_DIR 的设置放到 build.rs 里
-# FFMPEG_DIR = { value = "ext/ffmpeg-n7.1.1-54-g6400860b9d-win64-gpl-shared-7.1", relative = true, force = true }
+# 这里无法根据不同的操作系统来设置不同的环境变量, 所以将 FFMPEG_DIR 都存在同一个目录, 而且 windows 也支持 / 分隔符
+FFMPEG_DIR = { value = "ext/ffmpeg-gpl-shared-7.1", relative = true, force = true }
