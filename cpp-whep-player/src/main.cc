@@ -10,8 +10,11 @@
 
 #include <csignal>
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <vector>
+
+#include "logger.h"  // NOLINT
 
 struct CustomData {
   GstElement* webrtc_source;
@@ -29,7 +32,7 @@ struct CustomData {
   }
 
   ~CustomData() {
-    printf("\nDestructing resources...\n");
+    LOG_INFO("Destructing resources...");
     if (pipeline) {
       g_object_unref(pipeline);
     }
@@ -51,17 +54,17 @@ void handleSDPs(CustomData* data) {
   GstWebRTCSessionDescription* offerDesc;
 
   if (gst_sdp_message_new_from_text(data->sdpOffer.c_str(), &offerMessage) != GST_SDP_OK) {
-    printf("Unable to create SDP object from offer\n");
+    LOG_ERROR("Unable to create SDP object from offer");
   }
 
   offerDesc = gst_webrtc_session_description_new(GST_WEBRTC_SDP_TYPE_OFFER, offerMessage);
   if (!offerDesc) {
-    printf("Unable to create SDP object from offer msg\n");
+    LOG_ERROR("Unable to create SDP object from offer msg");
   }
 
   GstPromise* promiseRemote = gst_promise_new_with_change_func(onRemoteDescSetCallback, data, nullptr);
   if (!data->webrtc_source) {
-    printf("webrtc_source is NULL\n");
+    LOG_ERROR("webrtc_source is NULL");
   }
 
   g_signal_emit_by_name(data->webrtc_source, "set-remote-description", offerDesc, promiseRemote);
@@ -74,13 +77,13 @@ std::vector<std::string> getPostOffer(CustomData* data) {
   soup_message_set_request(msg, "application/sdp", SOUP_MEMORY_STATIC, "", 0);
 
   if (!msg) {
-    printf("ERROR: NULL msg in getPostOffer()\n");
+    LOG_ERROR("NULL msg in getPostOffer()");
     exit(EXIT_FAILURE);
   }
   auto statusCode = soup_session_send_message(session, msg);
 
   if (statusCode != 200 && statusCode != 201) {
-    printf("(%d):%s\n", statusCode, msg->response_body->data);
+    LOG_ERROR("(%d):%s\n", statusCode, msg->response_body->data);
     exit(EXIT_FAILURE);
   }
 
@@ -102,7 +105,7 @@ void patchAnswer(CustomData* data) {
   SoupSession* session = soup_session_new();
   SoupMessage* msg = soup_message_new("PATCH", data->location.c_str());
   if (!msg) {
-    printf("ERROR: when creating msg in patchAnswer()\n");
+    LOG_ERROR("when creating msg in patchAnswer()");
     exit(EXIT_FAILURE);
   }
   const char* sdp = data->sdpAnswer.c_str();
@@ -115,7 +118,7 @@ void patchAnswer(CustomData* data) {
   g_object_unref(session);
 
   if (statusCode != 204) {
-    printf("(%d):%s\n", statusCode, msg->response_body->data);
+    LOG_ERROR("(%d):%s", statusCode, msg->response_body->data);
     exit(EXIT_FAILURE);
   }
 }
@@ -140,56 +143,52 @@ int32_t main(int32_t argc, char** argv) {
   // Make elements
   data.webrtc_source = gst_element_factory_make("webrtcbin", "source");
   if (!data.webrtc_source) {
-    printf(
-        "Failed to make element source. Note: GST_PLUGIN_PATH needs to be "
-        "set as described in the README.\n");
+    LOG_ERROR("Failed to make element source. Note: GST_PLUGIN_PATH needs to be set");
     return 1;
   }
 
   data.sinkElement = gst_element_factory_make("glimagesink", "gli_sink");
   if (!data.sinkElement) {
-    printf("Failed to make element gli_sink\n");
+    LOG_ERROR("Failed to make element gli_sink");
     return 1;
   }
 
   data.rtp_depay_vp8 = gst_element_factory_make("rtpvp8depay", "rtp_depayloader_vp8");
   if (!data.rtp_depay_vp8) {
-    printf("Failed to make element rtp_depayloader_vp8\n");
+    LOG_ERROR("Failed to make element rtp_depayloader_vp8");
     return 1;
   }
 
   data.vp8_decoder = gst_element_factory_make("vp8dec", "vp8_decoder");
   if (!data.vp8_decoder) {
-    printf("Failed to make element vp8_decoder\n");
+    LOG_ERROR("Failed to make element vp8_decoder");
     return 1;
   }
 
   data.pipeline = gst_pipeline_new("pipeline");
   if (!data.pipeline) {
-    printf("Failed to make element pipeline\n");
+    LOG_ERROR("Failed to make element pipeline");
     return 1;
   }
 
   // Add elements
   if (!gst_bin_add(GST_BIN(data.pipeline), data.webrtc_source)) {
-    printf(
-        "Failed to add element source. Note: GST_PLUGIN_PATH needs to be "
-        "set as described in the README\n\n");
+    LOG_ERROR("Failed to add element source. Note: GST_PLUGIN_PATH needs to be set");
     return 1;
   }
 
   if (!gst_bin_add(GST_BIN(data.pipeline), data.rtp_depay_vp8)) {
-    printf("Failed to add element rtp_depayloader_vp8\n");
+    LOG_ERROR("Failed to add element rtp_depayloader_vp8");
     return 1;
   }
 
   if (!gst_bin_add(GST_BIN(data.pipeline), data.vp8_decoder)) {
-    printf("Failed to add element vp8_decoder\n");
+    LOG_ERROR("Failed to add element vp8_decoder");
     return 1;
   }
 
   if (!gst_bin_add(GST_BIN(data.pipeline), data.sinkElement)) {
-    printf("Failed to add element gli_sink\n");
+    LOG_ERROR("Failed to add element gli_sink");
     return 1;
   }
 
@@ -206,13 +205,13 @@ int32_t main(int32_t argc, char** argv) {
   }
 
   // Start playing
-  printf("Start playing...\n");
+  LOG_INFO("Start playing...");
   if (gst_element_set_state(data.pipeline, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE) {
-    printf("Unable to set the pipeline to the playing state\n");
+    LOG_ERROR("Unable to set the pipeline to the playing state");
     return 1;
   }
 
-  printf("Looping...\n");
+  LOG_INFO("Looping...");
   mainLoop = g_main_loop_new(nullptr, FALSE);
   g_main_loop_run(mainLoop);
 
@@ -224,10 +223,10 @@ int32_t main(int32_t argc, char** argv) {
 }
 
 void padAddedHandler(GstElement* src, GstPad* new_pad, CustomData* data) {
-  printf("Received new pad '%s' from '%s'\n", GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
+  LOG_INFO("Received new pad [%s] from [%s]", GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
 
   if (!gst_element_link_many(src, data->rtp_depay_vp8, data->vp8_decoder, data->sinkElement, nullptr)) {
-    printf("Failed to link source to sink\n");
+    LOG_ERROR("Failed to link source to sink");
   }
 }
 
@@ -239,7 +238,7 @@ void onRemoteDescSetCallback(GstPromise* promise, gpointer userData) {
   auto data = reinterpret_cast<CustomData*>(userData);
 
   if (gst_promise_wait(promise) != GST_PROMISE_RESULT_REPLIED) {
-    printf("onRemoteDescSetCallback: Failed to receive promise reply\n");
+    LOG_ERROR("onRemoteDescSetCallback: Failed to receive promise reply");
     exit(EXIT_FAILURE);
   }
   gst_promise_unref(promise);
@@ -254,7 +253,7 @@ void onAnswerCreatedCallback(GstPromise* promise, gpointer userData) {
   GstWebRTCSessionDescription* answerPointer = nullptr;
 
   if (gst_promise_wait(promise) != GST_PROMISE_RESULT_REPLIED) {
-    printf("onAnswerCreatedCallback: Failed to receive promise reply\n");
+    LOG_ERROR("onAnswerCreatedCallback: Failed to receive promise reply");
     exit(EXIT_FAILURE);
   }
   const GstStructure* reply = gst_promise_get_reply(promise);
@@ -263,8 +262,10 @@ void onAnswerCreatedCallback(GstPromise* promise, gpointer userData) {
 
   gst_structure_get(reply, "answer", GST_TYPE_WEBRTC_SESSION_DESCRIPTION, &answerPointer, nullptr);
   if (!answerPointer->sdp) {
-    printf("ERROR: No answer sdp!\n");
+    LOG_ERROR("No answer sdp!");
   }
+  LOG_INFO("Get answer sdp:\n");
+  std::cout << answerPointer->sdp << std::endl;
 
   g_signal_emit_by_name(data->webrtc_source, "set-local-description", answerPointer, nullptr);
   data->sdpAnswer = gst_sdp_message_as_text(answerPointer->sdp);
