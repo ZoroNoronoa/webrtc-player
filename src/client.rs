@@ -192,14 +192,30 @@ impl Client {
             .text()
             .await
             .map_err(|e| WebrtcError::ServerError(e.into()))?;
+        info!("answer: {}", answer);
 
-        self.rtc
-            .sdp_api()
-            .accept_answer(
-                pending,
-                SdpAnswer::from_sdp_string(&answer).map_err(|_| WebrtcError::SdpError)?,
-            )
-            .map_err(|_| WebrtcError::SdpError)?;
+        // self.rtc
+        //     .sdp_api()
+        //     .accept_answer(
+        //         pending,
+        //         SdpAnswer::from_sdp_string(&answer).map_err(|_| WebrtcError::SdpError)?,
+        //     )
+        //     .map_err(|_| WebrtcError::SdpError)?;
+
+        let sdp_answer = match SdpAnswer::from_sdp_string(&answer) {
+            Ok(answer) => answer,
+            Err(e) => {
+                error!("Failed to parse SDP answer: {:?}", e);
+                return Err(WebrtcError::SdpError);
+            }
+        };
+
+        match self.rtc.sdp_api().accept_answer(pending, sdp_answer) {
+            Ok(_) => {}
+            Err(e) => {
+                error!("Accept_answer failed: {:?}", e);
+            }
+        }
 
         Ok(())
     }

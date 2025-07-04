@@ -11,6 +11,19 @@ Requirements:
 
 ```bash
 brew install gstreamer gst-plugins-bad libsoup@2 icu4c cmake
+
+# 查看 libsoup 安装位置
+brew list libsoup@2
+
+# 验证是否安装成功
+pkg-config --libs gstreamer-1.0
+
+# 模糊查找 libsoup
+pkg-config --list-all | grep libsoup
+
+# Q: homebrew 安装完 libsoup@2 后, pkg-config 查找不到
+# A: https://blog.csdn.net/dotphoenix/article/details/127494393
+export PKG_CONFIG_PATH=$(find /usr/local/Cellar -name 'pkgconfig' -type d | grep lib/pkgconfig | tr '\n' ':' | sed s/.$//)
 ```
 
 ```bash

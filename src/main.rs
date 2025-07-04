@@ -15,6 +15,7 @@ use std::{collections::HashMap, sync::mpsc, time::Instant};
 
 mod client;
 mod encoder;
+mod logger;
 mod player;
 mod source;
 mod whip;
@@ -99,6 +100,8 @@ enum Commands {
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    logger::init_logger();
+
     ffmpeg_next::init()?;
 
     let args = Cli::parse();

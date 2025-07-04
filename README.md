@@ -9,6 +9,7 @@
     - [播放 WHIP](#播放-whip)
     - [播放 WHEP](#播放-whep)
       - [vdo.ninja（推荐，更加清晰）](#vdoninja推荐更加清晰)
+      - [srs](#srs)
       - [b.siobud.com](#bsiobudcom)
     - [推流](#推流)
   - [TODO](#todo)
@@ -85,6 +86,12 @@ just run play-whep https://whep.vdo.ninja/kkkkeeee
 ```
 
 可以看到直接弹出来一个播放器播放本地视频。
+
+#### srs
+
+```bash
+cargo run --release play-whep "http://volcvideo3.zelostech.com.cn:1780/rtc/v1/whep/?app=live&stream=ZL12353/bleft"
+```
 
 #### b.siobud.com
 

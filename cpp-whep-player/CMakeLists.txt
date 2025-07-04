@@ -8,7 +8,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "-ggdb -O3 -DNDEBUG -Wall -Werror -Wuninitialized -W
 
 if (APPLE)
         message("OSX")
-        set(ENV{PKG_CONFIG_PATH} "/usr/local/Cellar/icu4c/71.1/lib/pkgconfig:/usr/local/Cellar/libsoup@2/2.74.2_1/lib/pkgconfig:/opt/homebrew/opt/libsoup@2/lib/pkgconfig:/opt/homebrew/opt/icu4c/lib/pkgconfig/")
+        # set(ENV{PKG_CONFIG_PATH} "/usr/local/Cellar/icu4c/71.1/lib/pkgconfig:/usr/local/Cellar/libsoup@2/2.74.2_1/lib/pkgconfig:/opt/homebrew/opt/libsoup@2/lib/pkgconfig:/opt/homebrew/opt/icu4c/lib/pkgconfig/")
+        # 查找不到, 替换成:
+        # export PKG_CONFIG_PATH=$(find /usr/local/Cellar -name 'pkgconfig' -type d | grep lib/pkgconfig | tr '\n' ':' | sed s/.$//)
 endif()
 
 find_package(PkgConfig)

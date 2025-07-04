@@ -30,5 +30,6 @@
         "WHEP",
         "Xpress",
         "zcvf"
-    ]
+    ],
+    "cmake.sourceDirectory": "C:/Code/webrtc-player/cpp-whep-player"
 }

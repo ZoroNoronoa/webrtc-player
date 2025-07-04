@@ -6,12 +6,12 @@
 #include <gst/gst.h>
 #include <gst/sdp/sdp.h>
 #include <gst/webrtc/webrtc.h>
-#include <iostream>
+// #include <iostream>
 #include <libsoup/soup.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <vector>
+// #include <string.h>
+// #include <vector>
 
 struct CustomData {
 
