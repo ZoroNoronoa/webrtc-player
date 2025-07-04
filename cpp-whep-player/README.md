@@ -2,7 +2,7 @@
 
 ## Build from source
 
-### Linux
+### Linux (Ubuntu2204)
 
 源码安装 libsoup：
 
@@ -17,9 +17,12 @@ git checkout 2.74.2
 ```bash
 sudo apt install -y cmake build-essential
 
+sudo apt install -y libunwind-dev
 sudo apt install -y libgstreamermm-1.0-dev libgstreamer-plugins-bad1.0-dev libsoup2.4-dev
 sudo apt install -y gstreamer1.0-plugins-bad
 ```
+
+#### CMake
 
 ```bash
 cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" .
@@ -32,6 +35,16 @@ sudo make install
 ```bash
 # 需要先在 https://vdo.ninja/whip 页面选择 Host Steam 推流
 GST_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstreamer-1.0 ./whep-play https://whep.vdo.ninja/test
+```
+
+#### xmake
+
+```bash
+# 编译
+xmake build whep-player
+
+# 运行
+GST_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstreamer-1.0 xmake run whep-player https://whep.vdo.ninja/test
 ```
 
 ### OSX

@@ -21,7 +21,7 @@ pkg_check_modules(GSTREAMER_SDP REQUIRED gstreamer-sdp-1.0)
 pkg_check_modules(SOUP REQUIRED libsoup-2.4)
 
 set(FILES
-        main.cpp
+        src/main.cc
 )
 
 add_executable(whep-play ${FILES})
