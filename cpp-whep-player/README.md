@@ -34,7 +34,7 @@ sudo make install
 
 ```bash
 # 需要先在 https://vdo.ninja/whip 页面选择 Host Steam 推流
-GST_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstreamer-1.0 ./whep-play https://whep.vdo.ninja/test
+GST_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstreamer-1.0 ./whep-play https://whep.vdo.ninja/kkkkeeee
 ```
 
 #### xmake
@@ -44,7 +44,7 @@ GST_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstreamer-1.0 ./whep-play
 xmake build whep-player
 
 # 运行
-GST_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstreamer-1.0 xmake run whep-player https://whep.vdo.ninja/test
+GST_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstreamer-1.0 xmake run whep-player https://whep.vdo.ninja/kkkkeeee
 ```
 
 ### OSX

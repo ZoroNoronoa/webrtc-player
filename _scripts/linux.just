@@ -2,6 +2,8 @@ import 'common.just'
 
 export OPENSSL_NO_VENDOR := "1"
 
+FFmpegZipFileName := "ffmpeg-n7.1.1-54-g6400860b9d-linux64-gpl-shared-7.1"
+
 [no-cd]
 install-deps:
     #!/bin/sh
@@ -14,9 +16,10 @@ install-deps:
 
     if [ ! -d "{{FFmpeg}}" ]; then
         echo "Downloading {{FFmpeg}}"
-        wget "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/{{FFmpeg}}.tar.xz"
-        tar -xf {{FFmpeg}}.tar.xz
-        rm {{FFmpeg}}.tar.xz
+        wget "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-06-27-14-04/{{FFmpegZipFileName}}.tar.xz"
+        tar -xf {{FFmpegZipFileName}}.tar.xz
+        mv {{FFmpegZipFileName}} {{FFmpeg}}
+        rm {{FFmpegZipFileName}}.tar.xz
     fi
 
     # OpenSSL

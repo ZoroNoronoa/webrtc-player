@@ -17,15 +17,16 @@
 #include "logger.h"  // NOLINT
 
 struct CustomData {
-  GstElement* webrtc_source;
-  GstElement* pipeline;
-  GstElement* rtp_depay_vp8;
-  GstElement* vp8_decoder;
-  GstElement* sinkElement;
-  std::string sdpOffer;
-  std::string sdpAnswer;
+  GstElement* webrtc_source;  // 用于 WebRTC 信令和媒体流处理
+  GstElement* pipeline;       // GStreamer 流水线
+  GstElement* rtp_depay_vp8;  // 用于处理 VP8 格式的 RTP 数据包
+  GstElement* vp8_decoder;    // 指向 VP8 解码器元素
+  GstElement* sinkElement;    // 指向视频输出 （如 glimagesink） 元素
+
+  std::string sdpOffer;   // 保存 SDP offer 字符串
+  std::string sdpAnswer;  // 保存 SDP answer 字符串
   std::string location;
-  std::string whepURL;
+  std::string whepURL;  // 保存 WHEP 资源的 URL
 
   CustomData()
       : webrtc_source(nullptr), pipeline(nullptr), rtp_depay_vp8(nullptr), vp8_decoder(nullptr), sinkElement(nullptr) {
@@ -70,11 +71,11 @@ void handleSDPs(CustomData* data) {
   g_signal_emit_by_name(data->webrtc_source, "set-remote-description", offerDesc, promiseRemote);
 }
 
-std::vector<std::string> getPostOffer(CustomData* data) {
-  SoupSession* session = soup_session_new();
+void getPostOffer(CustomData* const data) {
+  SoupSession* session = ::soup_session_new();
 
-  SoupMessage* msg = soup_message_new("POST", data->whepURL.c_str());
-  soup_message_set_request(msg, "application/sdp", SOUP_MEMORY_STATIC, "", 0);
+  SoupMessage* msg = ::soup_message_new("POST", data->whepURL.c_str());
+  ::soup_message_set_request(msg, "application/sdp", SOUP_MEMORY_STATIC, "", 0);
 
   if (!msg) {
     LOG_ERROR("NULL msg in getPostOffer()");
@@ -90,15 +91,11 @@ std::vector<std::string> getPostOffer(CustomData* data) {
   const char* location = soup_message_headers_get_one(msg->response_headers, "location");
   std::string sdpOffer(msg->response_body->data);
 
-  std::vector<std::string> strVec;
-  strVec.push_back(sdpOffer);
-  strVec.push_back(location);
+  data->location = location;
+  data->sdpOffer = sdpOffer;
 
-  // Cleanup
   g_object_unref(msg);
   g_object_unref(session);
-
-  return strVec;
 }
 
 void patchAnswer(CustomData* data) {
@@ -127,16 +124,16 @@ int32_t main(int32_t argc, char** argv) {
   CustomData data;
 
   if (argc < 2) {
-    printf(
-        "Usage: GST_PLUGIN_PATH=my/plugin/path/gstreamer-1.0 ./whep-play "
-        "WHEP-URL\n");
+    std::cout << "Usage: GST_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstreamer-1.0 ./whep-play WHEP-URL"
+              << std::endl;
     return 1;
   }
 
   data.whepURL = argv[1];
-  std::vector<std::string> offerLocation = getPostOffer(&data);
-  data.sdpOffer = offerLocation[0];
-  data.location = offerLocation[1];
+  getPostOffer(&data);
+
+  LOG_INFO("WHEP SDP Offer:\n%s", data.sdpOffer.c_str());
+  LOG_INFO("WHEP Location: %s", data.location.c_str());
 
   gst_init(nullptr, nullptr);
 
