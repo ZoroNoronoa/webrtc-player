@@ -98,21 +98,20 @@ void getPostOffer(CustomData* const data) {
   g_object_unref(session);
 }
 
-void patchAnswer(CustomData* data) {
-  SoupSession* session = soup_session_new();
-  SoupMessage* msg = soup_message_new("PATCH", data->location.c_str());
+void patchAnswer(CustomData* const data) {
+  SoupSession* session = ::soup_session_new();
+  SoupMessage* msg = ::soup_message_new("PATCH", data->location.c_str());
   if (!msg) {
-    LOG_ERROR("when creating msg in patchAnswer()");
+    LOG_ERROR("Fail to create soup msg");
     exit(EXIT_FAILURE);
   }
   const char* sdp = data->sdpAnswer.c_str();
 
-  soup_message_set_request(msg, "application/sdp", SOUP_MEMORY_COPY, sdp, strlen(sdp));
-  auto statusCode = soup_session_send_message(session, msg);
+  ::soup_message_set_request(msg, "application/sdp", SOUP_MEMORY_COPY, sdp, strlen(sdp));
+  auto statusCode = ::soup_session_send_message(session, msg);
 
-  // Cleanup
-  g_object_unref(msg);
-  g_object_unref(session);
+  ::g_object_unref(msg);
+  ::g_object_unref(session);
 
   if (statusCode != 204) {
     LOG_ERROR("(%d):%s", statusCode, msg->response_body->data);
