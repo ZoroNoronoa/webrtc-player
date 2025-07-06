@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use local_ip_address::list_afinet_netifas;
-use reqwest::header::{HeaderValue, ACCEPT, AUTHORIZATION, CONTENT_TYPE, USER_AGENT};
+use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, HeaderValue, USER_AGENT};
 use serde::Deserialize;
 use std::{
     error::Error,
@@ -10,11 +10,11 @@ use std::{
     time::{Duration, Instant},
 };
 use str0m::{
+    Candidate, Event, IceConnectionState, Input, Output, Rtc,
     change::{SdpAnswer, SdpOffer},
     format::Codec,
     media::{Direction as RtcDirection, MediaData, MediaKind, MediaTime, Mid},
     net::{Protocol, Receive},
-    Candidate, Event, IceConnectionState, Input, Output, Rtc,
 };
 use tokio::net::UdpSocket;
 use tracing::{debug, error, info, trace, warn};
@@ -119,6 +119,8 @@ impl Client {
         direction: RtcDirection,
     ) -> Result<(), WebrtcError> {
         // Add receive tracks and generate an offer
+        // * stream-id: 也被叫做 Media Stream ID, 用于标识一个媒体流 (MediaStream), 用于同步一个流下的多个轨道 (比如音频和视频同步播放)
+        // * track-id: 也被叫做 Media Stream Track ID, 用于标识流中的某一个具体轨道 (比如音频轨道、视频轨道)
         let mut change = self.rtc.sdp_api();
         self.video_mid = Some(change.add_media(
             MediaKind::Video,
@@ -127,6 +129,13 @@ impl Client {
             Some("video_0".to_string()),
         ));
 
+        // 创建 SDP Offer
+        // * 如果此方法返回 SDPOffer, 说明更改不会立即生效, 调用者需要与 remote peer 进行协商, 并在获得 answer 后使用 SdpPendingOffer 应答
+        // * 如果返回 None, 要么没有更改, 要么更改可以直接应用无须协商
+        //
+        // 当你调用 `sdp_api().add_media` 后更改不会立即生效, 而是需要进行 SDP 协商
+        // `apply()` 方法会尝试应用这些更改, 如果更改需要协商, 那么 `apply()` 会发挥一个 SdpOffer, 你需要把 Offer 发送给 Remote Peer
+        // 此时 str0m 内部会生成一个 SdpPendingOffer, 它表示当前有一个待处理的 Offer, 等远端回复
         let (offer, pending) = change.apply().ok_or(WebrtcError::SdpError)?;
 
         let offer_str = offer.to_sdp_string();
@@ -136,6 +145,8 @@ impl Client {
 
         let mut headers = reqwest::header::HeaderMap::new();
 
+        // 构造 WHEP 协议中 SDP 交换请求的 header
+        // 如果有 token 的话需要附加到 Bearer 中
         if let Some(token) = &token {
             let authorization_value = HeaderValue::from_str(&format!("Bearer {}", token))
                 .map_err(|e| WebrtcError::ServerError(e.into()))?;
@@ -155,6 +166,7 @@ impl Client {
             .build()
             .map_err(|e| WebrtcError::ServerError(e.into()))?;
 
+        // 处理重定向的问题
         let mut next_url =
             reqwest::Url::from_str(&url).map_err(|e| WebrtcError::ServerError(e.into()))?;
         let res = loop {
@@ -184,6 +196,7 @@ impl Client {
         };
 
         // get answer sdp from body
+        // 从返回值中解析出来 SDP
         let http_code = res.status();
         info!("status: {}", http_code);
         if http_code != reqwest::StatusCode::CREATED {
@@ -198,14 +211,6 @@ impl Client {
             .await
             .map_err(|e| WebrtcError::ServerError(e.into()))?;
         info!("answer: {}", answer);
-
-        // self.rtc
-        //     .sdp_api()
-        //     .accept_answer(
-        //         pending,
-        //         SdpAnswer::from_sdp_string(&answer).map_err(|_| WebrtcError::SdpError)?,
-        //     )
-        //     .map_err(|_| WebrtcError::SdpError)?;
 
         let sdp_answer = match SdpAnswer::from_sdp_string(&answer) {
             Ok(answer) => answer,

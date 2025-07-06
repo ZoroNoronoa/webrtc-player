@@ -1,11 +1,11 @@
-use crate::client::{Client, WebrtcEvent};
 use crate::EncodedPacket;
+use crate::client::{Client, WebrtcEvent};
 use bytes::Bytes;
 use ffmpeg_next;
 use futures::executor;
 use std::{sync::mpsc, time::Instant};
 use str0m::media::Direction as RtcDirection;
-use tokio::sync::mpsc::{error::TryRecvError, UnboundedReceiver};
+use tokio::sync::mpsc::{UnboundedReceiver, error::TryRecvError};
 use tracing::{error, info};
 
 pub async fn publish(
