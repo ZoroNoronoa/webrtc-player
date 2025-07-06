@@ -1,0 +1,16 @@
+[package]
+name = "whep-player-examples"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+color-eyre = "0.6.5"
+tracing = "0.1.41"
+tracing-appender = "0.2.3"
+tracing-error = "0.2.1"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+
+[[example]]
+name = "tracing"
+path = "examples/tracing.rs"
+bench = false
