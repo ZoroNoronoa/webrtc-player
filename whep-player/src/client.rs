@@ -45,44 +45,49 @@ pub enum WebrtcError {
 }
 
 pub struct Client {
-    rtc: Rtc,
+    rtc: Rtc, // WebRTC 连接的核心对象
     socket: UdpSocket,
     local_socket_addr: SocketAddr,
-    buf: [u8; 1500],
-    video_mid: Option<Mid>,
+    buf: [u8; 1500], // udp 数据包缓冲区 (1500 字节, 标准 MTU (Maximum Transmission Unit) )
+    video_mid: Option<Mid>, // 媒体视频流的标识符
     _audio_mid: Option<Mid>,
 }
 
 impl Client {
     pub async fn new() -> Result<Self, WebrtcError> {
+        // 在系统上分配一个 UDP socket, 并绑定到所有网卡的任意可用端口
         let socket = UdpSocket::bind("0.0.0.0:0".parse::<SocketAddrV4>().unwrap())
             .await
             .expect("Should bind udp socket");
 
+        // 构建一个 WebRTC 对象
         let mut rtc = Rtc::builder()
-            .clear_codecs()
-            .enable_h264(true)
-            .set_stats_interval(Some(Duration::from_secs(2)))
-            .set_reordering_size_video(1)
-            .set_reordering_size_audio(1)
+            .clear_codecs() // 清除默认的音视频编解码器列表, 后续可以只启用你需要的编解码器, 避免不必要的协商
+            .enable_h264(true) // 启用 H264 视频编解码器
+            .set_stats_interval(Some(Duration::from_secs(2))) // 设置每 2 秒手机一次连接的统计数据
+            .set_reordering_size_video(1) // 设置视频流的乱序缓冲区为 1 (保证低延迟, 但是网络不佳时会丢帧)
+            .set_reordering_size_audio(1) // 设置音频流的乱序缓冲区为 1
             .build();
 
+        // 本地监听的 UDP 端口
         info!("local socket address: {:?}", socket.local_addr());
 
         // Discover host candidates
+        // 获取系统的网络接口列表, 为每个有效的 IPV4 接口创建 WebRTC ICE 候选者
         let mut local_socket_addr = None;
         if let Ok(network_interfaces) = list_afinet_netifas() {
             for (name, ip) in network_interfaces {
-                info!("iface: {} / {:?}", name, ip);
+                debug!("iface: {} / {:?}", name, ip);
                 match ip {
                     IpAddr::V4(ip4) => {
                         if !ip4.is_loopback() && !ip4.is_link_local() {
                             let socket_addr =
                                 SocketAddr::new(ip, socket.local_addr().unwrap().port());
                             local_socket_addr = Some(socket_addr.clone());
+                            info!("Discover local candidate: [{} / {:?}]", name, ip);
                             rtc.add_local_candidate(
                                 Candidate::host(socket_addr, str0m::net::Protocol::Udp)
-                                    .expect("Failed to create local candidate"),
+                                    .expect("Fail to create local candidate"),
                             );
                         }
                     }

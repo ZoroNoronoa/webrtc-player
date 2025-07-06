@@ -40,19 +40,19 @@ install-deps:
 
 [no-cd]
 build *param:
-    cargo build -vvv --release -- {{param}}
+    cargo build -vvv --release -p whep-player -- {{param}}
 
 [no-cd]
 build-debug *param:
-    cargo build -- {{param}}
+    cargo build -p whep-player -- {{param}}
 
 [no-cd]
 run *param:
-    cargo run --release -- {{param}}
+    cargo run --release -p whep-player -- {{param}}
 
 [no-cd]
 test *param:
-    cargo test -- {{param}}
+    cargo test -p whep-player -- {{param}}
 
 [no-cd]
 clippy:
@@ -60,8 +60,8 @@ clippy:
 
 [no-cd]
 debug *param:
-    cargo run -- {{param}}
+    cargo run -p whep-player -- {{param}}
 
 [no-cd]
 profile *param:
-    cargo run --profile profile -- {{param}}
+    cargo run --profile profile -p whep-player -- {{param}}

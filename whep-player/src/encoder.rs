@@ -1,11 +1,11 @@
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use ffmpeg::ffi::AVCodecContext;
-use ffmpeg::{codec::Context as CodecContext, encoder::Video, Frame, Packet};
+use ffmpeg::{Frame, Packet, codec::Context as CodecContext, encoder::Video};
 use ffmpeg_next as ffmpeg;
 use log::info;
 use std::{
     collections::HashMap,
-    ffi::{c_void, CString},
+    ffi::{CString, c_void},
 };
 
 pub struct Encoder {
@@ -60,14 +60,16 @@ impl Encoder {
     unsafe fn set_option(context: *mut AVCodecContext, name: &str, val: &str) -> Result<()> {
         let name_c = CString::new(name).context("Error in CString")?;
         let val_c = CString::new(val).context("Error in CString")?;
-        let retval: i32 = ffmpeg::ffi::av_opt_set(
-            context as *mut c_void,
-            name_c.as_ptr(),
-            val_c.as_ptr(),
-            ffmpeg::ffi::AV_OPT_SEARCH_CHILDREN,
-        );
-        if retval != 0 {
-            bail!("set_option failed: {retval}");
+        unsafe {
+            let retval: i32 = ffmpeg::ffi::av_opt_set(
+                context as *mut c_void,
+                name_c.as_ptr(),
+                val_c.as_ptr(),
+                ffmpeg::ffi::AV_OPT_SEARCH_CHILDREN,
+            );
+            if retval != 0 {
+                bail!("set_option failed: {retval}");
+            }
         }
         Ok(())
     }

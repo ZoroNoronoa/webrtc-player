@@ -1,35 +1,33 @@
 use crate::player::render_video;
 use anyhow::{Error, Result};
-use axum::{response::Response, routing::post, Router};
-use clap::{Parser, Subcommand};
+use axum::{Router, response::Response, routing::post};
+use clap::Parser;
 use encoder::Encoder;
 use ffmpeg_next::{
-    ffi::{av_buffer_ref, AVBufferRef},
-    format::Pixel,
     Packet, Rational,
+    ffi::{AVBufferRef, av_buffer_ref},
+    format::Pixel,
 };
-use log::LevelFilter;
-use simplelog::{ColorChoice, Config, TermLogger, TerminalMode};
 use source::Source;
 use std::{collections::HashMap, sync::mpsc, time::Instant};
+use whep_player::{Cli, Commands};
 
 mod client;
 mod encoder;
-mod logger;
 mod player;
 mod source;
 mod whip;
 
-struct EncodedPacket(Packet, Instant);
-
 // no_mangle: 防止 Rust 编译器对符号名进行名称修饰 (name mangling)
 // 用于 NVIDIA 和 AMD 驱动精确匹配这个符号名
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[allow(non_upper_case_globals)]
 pub static NvOptimusEnablement: i32 = 1;
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[allow(non_upper_case_globals)]
 pub static AmdPowerXpressRequestHighPerformance: i32 = 1;
+
+struct EncodedPacket(Packet, Instant);
 
 fn create_encoder(width: u32, height: u32, hw_frames: *mut AVBufferRef) -> Result<Encoder> {
     let encoder = Encoder::new(
@@ -60,64 +58,14 @@ fn create_encoder(width: u32, height: u32, hw_frames: *mut AVBufferRef) -> Resul
     Ok(encoder)
 }
 
-#[derive(Parser)]
-#[command(name = "bitwhip")]
-#[command(bin_name = "bitwhip")]
-struct Cli {
-    #[command(subcommand)]
-    commands: Commands,
-
-    /// Increase log verbosity, multiple occurrences (-vvv) further increase
-    #[clap(short, global = true, action = clap::ArgAction::Count)]
-    verbose: u8,
-}
-
-#[derive(Debug, Subcommand)]
-enum Commands {
-    /// Stream to a WHIP destination
-    #[command(arg_required_else_help = true)]
-    Stream {
-        /// The WHIP URL
-        url: String,
-
-        /// The WHIP bearer token
-        token: Option<String>,
-    },
-
-    /// Start a WHIP server that accepts incoming requests
-    PlayWHIP {},
-
-    /// Play from a WHEP destination
-    #[command(arg_required_else_help = true)]
-    PlayWHEP {
-        /// The WHEP URL
-        url: String,
-
-        /// The WHEP bearer token
-        token: Option<String>,
-    },
-}
-
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    logger::init_logger();
-
+    // 初始化 ffmpeg
     ffmpeg_next::init()?;
 
+    // 初始化日志
     let args = Cli::parse();
-    let level_filter = match args.verbose {
-        0 => LevelFilter::Warn,
-        1 => LevelFilter::Info,
-        2 => LevelFilter::Debug,
-        3.. => LevelFilter::Trace,
-    };
-
-    TermLogger::init(
-        level_filter,
-        Config::default(),
-        TerminalMode::Mixed,
-        ColorChoice::Auto,
-    )?;
+    // bitwhip::util::init_logger(args.verbose);
 
     match args.commands {
         Commands::Stream { url, token } => stream(url, token).await?,
@@ -209,6 +157,8 @@ async fn play_whip() {
 }
 
 async fn play_whep(url: String, token: Option<String>) -> Result<()> {
+    // mpsc: Multi-Producer Single-Consumer
+    // 多生产者, 单消费者, 用于在不同的线程之间传递数据
     let (tx, rx): (
         mpsc::Sender<ffmpeg_next::frame::Video>,
         mpsc::Receiver<ffmpeg_next::frame::Video>,

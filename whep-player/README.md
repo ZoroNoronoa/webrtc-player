@@ -1,6 +1,6 @@
-# BitWHIP
+# WhepPlayer
 
-- [BitWHIP](#bitwhip)
+- [WhepPlayer](#whepplayer)
   - [什么是 BitWHIP](#什么是-bitwhip)
   - [构建](#构建)
     - [安装 Just](#安装-just)
@@ -42,7 +42,7 @@ BitWHIP 使用 [just](https://github.com/casey/just) 简化依赖安装和构建
 
 ### 安装依赖
 
-choco 包管理器安装相关依赖：
+windows 需要用 choco 包管理器安装相关依赖：
 
 ```bash
 # 安装 choco
@@ -83,6 +83,9 @@ WHIP 客户端应使用 `http://localhost:1337/` 作为 URL，并可使用任意
 ```bash
 # play WHEP
 just run play-whep https://whep.vdo.ninja/kkkkeeee
+
+# 打印详细日志, 支持 -vvv
+just run play-whep https://whep.vdo.ninja/kkkkeeee -v
 ```
 
 可以看到直接弹出来一个播放器播放本地视频。
