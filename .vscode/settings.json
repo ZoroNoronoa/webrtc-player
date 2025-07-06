@@ -7,6 +7,7 @@
         "ffplay",
         "gdigrab",
         "gortsplib",
+        "gstreamer",
         "iface",
         "linuxaarch",
         "linuxx",
@@ -15,6 +16,8 @@
         "nalus",
         "netifas",
         "nvenc",
+        "println",
+        "RAII",
         "rtph",
         "rustc",
         "Selkies",
@@ -25,11 +28,16 @@
         "siobud",
         "sloc",
         "taiki",
+        "usize",
         "Vcpkg",
         "Webrtc",
         "WHEP",
+        "xmake",
         "Xpress",
         "zcvf"
     ],
-    "cmake.sourceDirectory": "C:/Code/webrtc-player/cpp-whep-player"
+    "cmake.sourceDirectory": "C:/Code/webrtc-player/cpp-whep-player",
+    "cSpell.enabledFileTypes": {
+        "log": false
+    }
 }
