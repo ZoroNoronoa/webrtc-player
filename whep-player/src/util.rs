@@ -1,57 +1,52 @@
-// use std::fs;
-// use std::path::Path;
-// use tracing::*;
-// use tracing_appender::{non_blocking, rolling};
-// use tracing_subscriber::{
-//     filter::EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt, Registry,
-// };
+use tracing::*;
+use tracing_appender::{non_blocking, non_blocking::WorkerGuard, rolling};
+use tracing_subscriber::{
+    Layer, filter::LevelFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt,
+};
 
-// /**
-//  * - 同时输出到控制台和文件
-//  * - 控制台开启 pretty, 文件使用普通格式
-//  * - 日志文件按小时分割, 最大存储时间为 7 天
-//  */
-// pub fn init_logger(verbose: u8) {
-// let level_filter = match verbose {
-//     0 => Level::WARN,
-//     1 => Level::INFO,
-//     2 => Level::DEBUG,
-//     3.. => Level::TRACE,
-// };
+pub fn init_logger(verbose: u8) -> Result<WorkerGuard, std::io::Error> {
+    let level_filter = match verbose {
+        0 => LevelFilter::WARN,
+        1 => LevelFilter::INFO,
+        2 => LevelFilter::DEBUG,
+        3.. => LevelFilter::TRACE,
+    };
 
-// 控制台日志 (开启 pretty)
-// let console_layer = fmt::layer()
-//     .pretty()
-//     .with_file(true)
-//     .with_line_number(true)
-//     .with_target(false)
-//     .with_writer(std::io::stderr);
+    // 控制台日志 (pretty)
+    let console_layer = fmt::layer()
+        .pretty()
+        .with_file(true)
+        .with_line_number(true)
+        .with_target(false)
+        .with_writer(std::io::stderr)
+        .with_filter(level_filter);
 
-// let console_layer = fmt::layer()
-//     .with_file(true)
-//     .with_line_number(true)
-//     .with_target(false)
-//     .with_level(true)
-//     .with_filter(LevelFilter::INFO);
+    // 文件日志
+    // * 按小时轮转
+    // * 最大存储 7 天
+    let file_appender = rolling::RollingFileAppender::builder()
+        .rotation(rolling::Rotation::HOURLY)
+        .filename_prefix("whep-player")
+        .max_log_files(7 * 24)
+        .build("logs")
+        .expect("Create log file failed");
+    // _guard 用于确保文件句柄在程序退出时被关闭, 可以顺利 dump 所有日志
+    // 必须将 _guard 返回, 否则后台的日志记录线程会直接退出导致日志不会被记录到文件中
+    let (non_blocking_appender, _guard) = non_blocking(file_appender);
+    let file_layer = fmt::layer()
+        .with_ansi(false)
+        .with_file(true)
+        .with_line_number(true)
+        .with_target(false)
+        .with_writer(non_blocking_appender)
+        .with_filter(LevelFilter::TRACE);
 
-// let log_file_path = "logs/bitwhip.log";
-// let log_dir = Path::new(log_file_path).parent().unwrap();
-// let log_file = fs::File::options()
-//     .append(true)
-//     .create(true)
-//     .open(log_file_path)
-//     .expect("Failed to open log file");
+    tracing_subscriber::registry()
+        .with(console_layer)
+        .with(file_layer)
+        .init();
 
-// fs::create_dir_all(log_dir).expect("Failed to create log directory");
+    info!("Init logger successfully!");
 
-// tracing_subscriber::fmt()
-//     .pretty() // 启用多行美化格式
-//     .with_file(true)
-//     .with_line_number(true)
-//     .with_target(false)
-//     .with_max_level(level_filter)
-//     .with_writer(log_file)
-//     .init();
-
-// info!("Init logger successfully!");
-// }
+    return Ok(_guard);
+}

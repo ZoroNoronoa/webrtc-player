@@ -20,18 +20,12 @@ fn call_return_err() {
     }
 }
 
-// 不加这个符号的话, link 会报错
-// #[no_mangle]
-// #[allow(non_upper_case_globals)]
-// pub static NvOptimusEnablement: i32 = 1;
-// #[no_mangle]
-// #[allow(non_upper_case_globals)]
-// pub static AmdPowerXpressRequestHighPerformance: i32 = 1;
-
 // cargo build --example tracing
 // cargo run --example tracing
 fn main() -> Result<()> {
+    // 日志级别
     let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+
     // 输出到控制台中
     let formatting_layer = fmt::layer().pretty().with_writer(std::io::stderr);
 

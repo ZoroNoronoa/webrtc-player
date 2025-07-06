@@ -65,7 +65,7 @@ async fn main() -> Result<(), Error> {
 
     // 初始化日志
     let args = Cli::parse();
-    // bitwhip::util::init_logger(args.verbose);
+    let _guard = whep_player::util::init_logger(args.verbose);
 
     match args.commands {
         Commands::Stream { url, token } => stream(url, token).await?,

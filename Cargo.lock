@@ -2350,6 +2350,7 @@ dependencies = [
  "axum",
  "bytes",
  "clap",
+ "color-eyre",
  "ffmpeg-next",
  "ffmpeg-sys-next",
  "futures",
@@ -2361,6 +2362,9 @@ dependencies = [
  "str0m",
  "tokio",
  "tracing",
+ "tracing-appender",
+ "tracing-error",
+ "tracing-subscriber",
 ]
 
 [[package]]
