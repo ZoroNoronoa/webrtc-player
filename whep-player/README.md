@@ -94,7 +94,7 @@ just run play-whep https://whep.vdo.ninja/kkkkeeee -v
 
 ```bash
 # 只支持 release
-cargo run --release --bin whep-player play-whep "http://volcvideo12.zelostech.com.cn:1790/rtc/v1/whep/?app=live&stream=ZL11869/bleft"
+cargo run --release --bin whep-player play-whep "http://volcvideo12.zelostech.com.cn:1790/rtc/v1/whep/?app=live&stream=ZL11869/bleft" -v
 ```
 
 #### b.siobud.com
