@@ -210,9 +210,32 @@ impl Client {
             .text()
             .await
             .map_err(|e| WebrtcError::ServerError(e.into()))?;
-        info!("answer: {}", answer);
+        info!("answer:\n{}", answer);
+        // for (i, line) in answer.lines().enumerate() {
+        //     println!("{}: {}", i, line);
+        // }
+        let modified_answer = answer
+            .lines()
+            .map(|line| {
+                if line.starts_with("o=") {
+                    // o (Origin) 行描述会话的创建信息, SRS 目前传递的是 `o=SRS/5.0.217(Bee)` 无法解析
+                    let mut words: Vec<&str> = line.split_whitespace().collect();
+                    if !words.is_empty() {
+                        words[0] = "o=-";
+                    }
+                    words.join(" ")
+                } else if line.starts_with("s=") {
+                    // s (Session Name) 行描述会话的名称, SRS 目前传递的是 `s=SRSPlaySession` 无法解析
+                    "s=-".to_string()
+                } else {
+                    line.to_string()
+                }
+            })
+            .collect::<Vec<String>>()
+            .join("\n");
+        info!("modified_answer:\n{}", modified_answer);
 
-        let sdp_answer = match SdpAnswer::from_sdp_string(&answer) {
+        let sdp_answer = match SdpAnswer::from_sdp_string(&modified_answer) {
             Ok(answer) => answer,
             Err(e) => {
                 error!("Failed to parse SDP answer: {:?}", e);

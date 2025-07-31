@@ -93,8 +93,8 @@ just run play-whep https://whep.vdo.ninja/kkkkeeee -v
 #### srs
 
 ```bash
-# 只支持 release
-cargo run --release --bin whep-player play-whep "http://volcvideo12.zelostech.com.cn:1790/rtc/v1/whep/?app=live&stream=ZL11869/bleft" -v
+# 只支持 release, 其他模式 link 会失败
+cargo run --release --bin whep-player play-whep "http://volcvideo19.zelostech.com.cn:1790/rtc/v1/whep/?app=live&stream=ZL20621/bleft" -v
 ```
 
 #### b.siobud.com
